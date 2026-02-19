@@ -19,11 +19,12 @@ export function Footer() {
               Platform edukasi bisnis terpercaya untuk membantu UMKM Indonesia naik kelas melalui pembelajaran terstruktur dan komunitas supportif.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-blue-600">
+              {/* Atribut target="_blank" ditambahkan agar link terbuka di tab baru */}
+              <Link href="https://www.instagram.com/scalebiz_academy/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-600">
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-blue-600">
+              <Link href="https://www.youtube.com/@ValifyVibeBelajarDari" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-600">
                 <Youtube className="h-5 w-5" />
                 <span className="sr-only">YouTube</span>
               </Link>
@@ -31,7 +32,7 @@ export function Footer() {
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
-               <Link href="#" className="text-muted-foreground hover:text-blue-600">
+               <Link href="https://www.instagram.com/scalebiz_academy/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-600">
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </Link>
@@ -64,6 +65,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-4 text-slate-900 dark:text-slate-100">Perusahaan</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
+              {/* Tautan internal ini sudah terhubung dengan halaman yang baru dibuat */}
               <li><Link href="/tentang" className="hover:text-blue-600">Tentang Kami</Link></li>
               <li><Link href="/komunitas" className="hover:text-blue-600">Komunitas</Link></li>
               <li><Link href="/faq" className="hover:text-blue-600">FAQ</Link></li>
@@ -79,6 +81,7 @@ export function Footer() {
             &copy; 2026 ScaleBiz Academy. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
+            {/* Tautan privasi dan term sudah terhubung */}
             <Link href="/privacy" className="hover:text-blue-600">Kebijakan Privasi</Link>
             <Link href="/terms" className="hover:text-blue-600">Syarat & Ketentuan</Link>
           </div>

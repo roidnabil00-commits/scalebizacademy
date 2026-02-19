@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { notFound } from "next/navigation" // Untuk handle 404
+import { notFound } from "next/navigation" 
 import { createClient } from "@/lib/supabase"
 import { ArrowLeft, Calendar, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -45,7 +45,7 @@ export default async function BlogDetailPage(props: PageProps) {
       {/* NAV BACK */}
       <div className="border-b sticky top-16 md:top-20 bg-white/95 dark:bg-slate-950/95 backdrop-blur z-20">
         <div className="container max-w-screen-lg py-4 px-6 md:px-12">
-            <Link href="/blog" className="inline-flex items-center text-sm text-muted-foreground hover:text-blue-600 transition-colors">
+            <Link href="/admin/blog" className="inline-flex items-center text-sm text-muted-foreground hover:text-blue-600 transition-colors">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Blog
             </Link>
@@ -83,14 +83,12 @@ export default async function BlogDetailPage(props: PageProps) {
             </div>
         )}
 
-        {/* CONTENT BODY */}
-        <div className="prose prose-lg prose-blue dark:prose-invert mx-auto">
-            {/* Render teks biasa dengan paragraph break sederhana */}
-            {/* Note: Jika nanti mau pakai Rich Text Editor, disini pakai dangerouslySetInnerHTML */}
-            {post.content.split('\n').map((paragraph: string, idx: number) => (
-                <p key={idx}>{paragraph}</p>
-            ))}
-        </div>
+        {/* CONTENT BODY (PERBAIKAN DISINI) */}
+        {/* Menggunakan dangerouslySetInnerHTML agar tag HTML dari editor terbaca sebagai format */}
+        <div 
+            className="prose prose-lg prose-blue dark:prose-invert mx-auto break-words"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         {/* AUTHOR BOX */}
         <div className="mt-16 bg-slate-50 dark:bg-slate-900 p-8 rounded-xl border flex items-center gap-6">

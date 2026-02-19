@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+// IMPORT KOMPONEN EDITOR BARU
+import RichTextEditor from "@/components/ui/rich-text-editor" 
+
 export default function CreateBlogPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -21,7 +24,9 @@ export default function CreateBlogPage() {
   const [category, setCategory] = useState("")
   const [imageUrl, setImageUrl] = useState("")
   const [excerpt, setExcerpt] = useState("")
-  const [content, setContent] = useState("")
+  
+  // Content sekarang akan berisi HTML string (misal: "<p>Halo <b>Dunia</b></p>")
+  const [content, setContent] = useState("") 
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
@@ -30,11 +35,11 @@ export default function CreateBlogPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault() // Mencegah reload halaman
+    e.preventDefault()
     setLoading(true)
     
-    // 1. Validasi Manual (Cek Form Kosong)
-    if (!title || !slug || !content || !category) {
+    // Validasi: Cek apakah konten editor kosong (atau hanya tag p kosong)
+    if (!title || !slug || !content || content === '<p></p>' || !category) {
         alert("Mohon lengkapi Judul, Slug, Kategori, dan Isi Konten!")
         setLoading(false)
         return
@@ -43,7 +48,6 @@ export default function CreateBlogPage() {
     const supabase = createClient()
     console.log("Mencoba kirim data ke Supabase...")
 
-    // 2. Cek User
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
         alert("Sesi habis. Silakan login ulang.")
@@ -51,7 +55,6 @@ export default function CreateBlogPage() {
         return
     }
 
-    // 3. Eksekusi Insert
     const { data, error } = await supabase
         .from('blog_posts')
         .insert([{ 
@@ -60,12 +63,11 @@ export default function CreateBlogPage() {
             category, 
             image_url: imageUrl, 
             excerpt, 
-            content,
+            content, // Ini sekarang menyimpan HTML
             author: user.user_metadata.full_name || 'Admin' 
         }])
         .select()
 
-    // 4. Cek Hasil
     if (error) {
         console.error("Error Upload:", error)
         alert(`GAGAL: ${error.message}`)
@@ -78,7 +80,7 @@ export default function CreateBlogPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-10">
+    <div className="max-w-5xl mx-auto pb-20">
       
       {/* HEADER */}
       <div className="mb-6">
@@ -88,32 +90,37 @@ export default function CreateBlogPage() {
         <h1 className="text-3xl font-bold">Tulis Artikel Baru</h1>
       </div>
 
-      {/* FORM WRAPPER - INI YANG KEMARIN HILANG */}
       <form onSubmit={handleSubmit}>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* KIRI: EDITOR UTAMA */}
             <div className="lg:col-span-2 space-y-6">
                 <Card>
-                    <CardContent className="pt-6 space-y-4">
+                    <CardContent className="pt-6 space-y-6">
                         <div className="space-y-2">
                             <Label>Judul Artikel <span className="text-red-500">*</span></Label>
-                            <Input placeholder="Judul menarik..." value={title} onChange={handleTitleChange} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Slug (URL) <span className="text-red-500">*</span></Label>
-                            <Input value={slug} onChange={(e) => setSlug(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Isi Artikel <span className="text-red-500">*</span></Label>
-                            <Textarea 
-                                className="min-h-[400px] font-mono text-sm" 
-                                placeholder="Tulis konten artikel disini..." 
-                                value={content} 
-                                onChange={(e) => setContent(e.target.value)} 
+                            <Input 
+                                className="text-lg font-medium"
+                                placeholder="Judul artikel yang menarik..." 
+                                value={title} 
+                                onChange={handleTitleChange} 
                                 required 
                             />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <Label>Isi Konten <span className="text-red-500">*</span></Label>
+                            
+                            {/* GANTI TEXTAREA DENGAN RICH TEXT EDITOR */}
+                            <RichTextEditor 
+                                content={content} 
+                                onChange={setContent} 
+                            />
+                            
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Tekan 'CMD+B' untuk tebal, 'CMD+I' untuk miring. Blok teks untuk opsi lainnya.
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -122,8 +129,13 @@ export default function CreateBlogPage() {
             {/* KANAN: META DATA & TOMBOL */}
             <div className="space-y-6">
                  <Card>
-                    <CardHeader><CardTitle className="text-base">Pengaturan</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="text-base">Pengaturan Publikasi</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Slug (URL) <span className="text-red-500">*</span></Label>
+                            <Input value={slug} onChange={(e) => setSlug(e.target.value)} required />
+                        </div>
+                        
                         <div className="space-y-2">
                             <Label>Kategori <span className="text-red-500">*</span></Label>
                             <Select onValueChange={setCategory} required>
@@ -133,26 +145,35 @@ export default function CreateBlogPage() {
                                     <SelectItem value="Keuangan">Keuangan</SelectItem>
                                     <SelectItem value="Operasional">Operasional</SelectItem>
                                     <SelectItem value="Teknologi">Teknologi</SelectItem>
+                                    <SelectItem value="Mindset">Mindset</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
+
                         <div className="space-y-2">
                             <Label>URL Gambar Cover</Label>
                             <Input placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
                         </div>
+
                         <div className="space-y-2">
                             <Label>Ringkasan (Excerpt)</Label>
-                            <Textarea className="h-24" placeholder="Muncul di halaman depan..." value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
+                            <Textarea 
+                                className="h-32 text-sm" 
+                                placeholder="Tulis ringkasan singkat untuk tampilan kartu di halaman depan..." 
+                                value={excerpt} 
+                                onChange={(e) => setExcerpt(e.target.value)} 
+                            />
                         </div>
 
-                        {/* TOMBOL SUBMIT */}
-                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 font-bold" disabled={loading}>
-                            {loading ? (
-                                <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Menyimpan...</>
-                            ) : (
-                                "Terbitkan Artikel"
-                            )}
-                        </Button>
+                        <div className="pt-4">
+                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 font-bold h-12 text-base" disabled={loading}>
+                                {loading ? (
+                                    <><Loader2 className="w-5 h-5 mr-2 animate-spin"/> Menerbitkan...</>
+                                ) : (
+                                    "Terbitkan Artikel Sekarang"
+                                )}
+                            </Button>
+                        </div>
 
                     </CardContent>
                 </Card>
